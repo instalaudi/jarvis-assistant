@@ -1,0 +1,41 @@
+# Android
+*.iml
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Kotlin
+*.versions.toml.bin
+
+# Built-in APKs
+*.apk
+*.aab
+
+# Keystore
+*.jks
+*.keystore
+keystore.properties
+signing_report.txt
+
+# Log files
+*.log
+
+# Project specific
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+android/keystore.properties
+android/*.apk
+android/signing_report.txt

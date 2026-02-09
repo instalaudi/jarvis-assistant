@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- JARVIS Color Palette -->
+    
+    <!-- Primary Colors -->
+    <color name="jarvis_cyan">#00D4FF</color>
+    <color name="jarvis_cyan_light">#6EFFFF</color>
+    <color name="jarvis_cyan_dark">#0097B2</color>
+    
+    <!-- Accent Colors -->
+    <color name="jarvis_gold">#FFD700</color>
+    <color name="jarvis_orange">#FF6B35</color>
+    <color name="jarvis_amber">#FFA500</color>
+    
+    <!-- Background Colors -->
+    <color name="jarvis_black">#0A0E14</color>
+    <color name="jarvis_deep_blue">#0D1B2A</color>
+    <color name="jarvis_dark_blue">#1B263B</color>
+    <color name="jarvis_navy">#1E3A5F</color>
+    
+    <!-- Surface Colors -->
+    <color name="jarvis_surface">#0F1419</color>
+    <color name="jarvis_surface_variant">#1A2332</color>
+    <color name="jarvis_card">#152238</color>
+    
+    <!-- Text Colors -->
+    <color name="jarvis_text_primary">#E0E6ED</color>
+    <color name="jarvis_text_secondary">#8892A0</color>
+    <color name="jarvis_text_muted">#5A6270</color>
+    
+    <!-- Status Colors -->
+    <color name="jarvis_success">#00E676</color>
+    <color name="jarvis_warning">#FFAB00</color>
+    <color name="jarvis_error">#FF5252</color>
+    <color name="jarvis_info">#448AFF</color>
+    
+    <!-- Glow Colors -->
+    <color name="glow_cyan">#6000D4FF</color>
+    <color name="glow_gold">#60FFD700</color>
+</resources>

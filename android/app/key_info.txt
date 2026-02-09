@@ -1,0 +1,26 @@
+Nombre de Alias: jarvis_release
+Fecha de Creación: 8 feb 2026
+Tipo de Entrada: PrivateKeyEntry
+Longitud de la Cadena de Certificado: 1
+Certificado[1]:
+Propietario: CN=Jarvis AI, OU=Development, O=Jarvis Corp, L=Tech City, ST=State, C=US
+Emisor: CN=Jarvis AI, OU=Development, O=Jarvis Corp, L=Tech City, ST=State, C=US
+Número de serie: 7f96bb03e7e2ca95
+Válido desde: Sun Feb 08 00:04:53 CST 2026 hasta: Thu Jun 26 00:04:53 CST 2053
+Huellas digitales del certificado:
+	 SHA1: 14:9A:74:DE:28:4F:1C:07:33:AA:E5:69:E1:2B:5A:80:A5:77:06:16
+	 SHA256: 42:EB:27:B1:C0:89:FA:A7:EE:7F:54:74:9D:84:66:71:42:0F:98:5E:17:FA:76:6E:63:65:DB:AC:38:B4:03:96
+Nombre del algoritmo de firma: SHA384withRSA
+Algoritmo de clave pública de asunto: Clave RSA de 2048 bits
+Versión: 3
+
+Extensiones: 
+
+#1: ObjectId: 2.5.29.14 Criticality=false
+SubjectKeyIdentifier [
+KeyIdentifier [
+0000: 8C D2 73 42 AD 4C 79 5F   11 7A 3C 0B C0 78 50 58  ..sB.Ly_.z<..xPX
+0010: AE A0 31 1C                                        ..1.
+]
+]
+

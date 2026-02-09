@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">J.A.R.V.I.S.</string>
+    <string name="widget_description">Widget de acceso rápido a J.A.R.V.I.S.</string>
+    <string name="voice_button_description">Activar reconocimiento de voz</string>
+    <string name="status_online">En línea</string>
+    <string name="status_offline">Sin conexión</string>
+    <string name="status_listening">Escuchando...</string>
+    <string name="status_processing">Procesando...</string>
+    <string name="status_speaking">Hablando...</string>
+    
+    <!-- Setup -->
+    <string name="setup_welcome">Bienvenido</string>
+    <string name="setup_api_key">API Key de OpenAI</string>
+    <string name="setup_name">¿Cómo debo llamarle?</string>
+    <string name="setup_complete">Activar J.A.R.V.I.S.</string>
+    
+    <!-- Settings -->
+    <string name="settings_voice">Voz</string>
+    <string name="settings_voice_recognition">Reconocimiento de Voz</string>
+    <string name="settings_tts">Respuestas por Voz</string>
+    <string name="settings_notifications">Notificaciones</string>
+    <string name="settings_whatsapp">Leer WhatsApp</string>
+    <string name="settings_media">Control de Música</string>
+    <string name="settings_gmail">Gmail</string>
+    <string name="settings_xiaomi">Optimización Xiaomi</string>
+    <string name="settings_about">Acerca de</string>
+    <string name="settings_version">Versión</string>
+    <string name="settings_clear_data">Borrar Datos</string>
+    
+    <!-- Errors -->
+    <string name="error_no_internet">Sin conexión a Internet</string>
+    <string name="error_api_key">API key inválida</string>
+    <string name="error_voice_recognition">Error de reconocimiento de voz</string>
+    <string name="error_generic">Ha ocurrido un error</string>
+    
+    <!-- JARVIS responses -->
+    <string name="jarvis_greeting_morning">Buenos días, señor. Todos los sistemas están operativos.</string>
+    <string name="jarvis_greeting_afternoon">Buenas tardes, señor. ¿En qué puedo asistirle?</string>
+    <string name="jarvis_greeting_evening">Buenas noches, señor. Estoy a su disposición.</string>
+</resources>
