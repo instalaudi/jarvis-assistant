@@ -57,6 +57,10 @@ class ChatRepositoryTest {
         whenever(editor.putString(any(), any())).thenReturn(editor)
         whenever(editor.putBoolean(any(), any())).thenReturn(editor)
 
+        // Las funciones suspend que devuelven Int se boxean en el bytecode: sin stub,
+        // Mockito devuelve null y Kotlin lanza NPE al unboxear a int.
+        wheneverBlocking { messageDao.getMessageCount() }.thenReturn(0)
+
         repository = ChatRepository(openAIService, geminiService, messageDao, prefs)
     }
 
@@ -80,7 +84,6 @@ class ChatRepositoryTest {
 
         val result = repository.sendMessage("Hola JARVIS")
 
-        result.exceptionOrNull()?.printStackTrace()
         assertTrue("Excepción inesperada: ${result.exceptionOrNull()}", result.isSuccess)
         assertEquals(MessageRole.ASSISTANT, result.getOrNull()?.role)
         assertEquals("Buenos días, señor.", result.getOrNull()?.content)
