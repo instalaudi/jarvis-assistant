@@ -1,133 +1,201 @@
 package com.jarvis.assistant.data.repository
 
+import android.content.SharedPreferences
+import com.jarvis.assistant.data.api.OpenAIMessage
 import com.jarvis.assistant.data.error.ApiKeyInvalidException
 import com.jarvis.assistant.data.error.ApiKeyNotConfiguredException
+import com.jarvis.assistant.data.error.NetworkTimeoutException
 import com.jarvis.assistant.data.error.NoInternetException
 import com.jarvis.assistant.data.error.RateLimitException
+import com.jarvis.assistant.data.error.ServerErrorException
+import com.jarvis.assistant.data.local.MessageDao
+import com.jarvis.assistant.data.model.AIProvider
+import com.jarvis.assistant.data.model.MessageRole
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.*
+import okhttp3.ResponseBody
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.mockito.kotlin.*
+import org.mockito.kotlin.any
+import org.mockito.kotlin.coVerify
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
+import org.mockito.kotlin.wheneverBlocking
+import retrofit2.HttpException
+import retrofit2.Response
+import java.io.IOException
+import java.net.SocketTimeoutException
 
 /**
- * Unit tests for ChatRepository
- * Tests API key validation, error handling, and message operations
+ * Unit tests para ChatRepository.
+ * Cubren la validación de API keys, el guardado de mensajes y el mapeo de errores de red/HTTP.
  */
 class ChatRepositoryTest {
 
-    // TODO: In a real project, inject mocks via Hilt or constructor
-    // For now, these are example test cases that demonstrate the expected behavior
+    private lateinit var openAIService: OpenAIServiceImpl
+    private lateinit var geminiService: GeminiServiceImpl
+    private lateinit var messageDao: MessageDao
+    private lateinit var prefs: SharedPreferences
+    private lateinit var editor: SharedPreferences.Editor
+    private lateinit var repository: ChatRepository
 
-    @Test
-    fun `sendMessage returns ApiKeyNotConfiguredException when API key is null`() = runTest {
-        // Given: A repository with no API key configured
-        // When: sendMessage is called
-        // Then: Result should be failure with ApiKeyNotConfiguredException
-        
-        // Example assertion pattern:
-        // val result = repository.sendMessage("Hello")
-        // assertTrue(result.isFailure)
-        // assertTrue(result.exceptionOrNull() is ApiKeyNotConfiguredException)
-        
-        // Placeholder assertion
-        assertTrue("API key validation should be tested", true)
+    @Before
+    fun setUp() {
+        openAIService = mock()
+        geminiService = mock()
+        messageDao = mock()
+        prefs = mock()
+        editor = mock()
+
+        whenever(prefs.edit()).thenReturn(editor)
+        whenever(editor.putString(any(), any())).thenReturn(editor)
+        whenever(editor.putBoolean(any(), any())).thenReturn(editor)
+
+        repository = ChatRepository(openAIService, geminiService, messageDao, prefs)
     }
 
     @Test
-    fun `sendMessage returns success with valid API key and network`() = runTest {
-        // Given: A repository with valid API key and working network
-        // When: sendMessage is called with valid content
-        // Then: Result should be success with Message
-        
-        // Example assertion pattern:
-        // val result = repository.sendMessage("Hello JARVIS")
-        // assertTrue(result.isSuccess)
-        // assertNotNull(result.getOrNull())
-        // assertEquals(MessageRole.ASSISTANT, result.getOrNull()?.role)
-        
-        assertTrue("Successful message flow should be tested", true)
+    fun `sendMessage falla con ApiKeyNotConfiguredException si no hay API key`() = runTest {
+        // Ningún getString stubbeado devuelve null → no hay clave configurada
+        val result = repository.sendMessage("Hola JARVIS")
+
+        assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull() is ApiKeyNotConfiguredException)
+        // El mensaje del usuario no debe guardarse si no hay clave
+        coVerify(exactly = 0) { messageDao.insertMessage(any()) }
     }
 
     @Test
-    fun `sendMessage returns RateLimitException on HTTP 429`() = runTest {
-        // Given: A repository where API returns 429
-        // When: sendMessage is called
-        // Then: Result should be failure with RateLimitException
-        
-        // Example:
-        // whenever(mockApi.createChatCompletion(any(), any()))
-        //     .thenThrow(HttpException(Response.error<Any>(429, ResponseBody.create(null, ""))))
-        // val result = repository.sendMessage("Hello")
-        // assertTrue(result.exceptionOrNull() is RateLimitException)
-        
-        assertTrue("Rate limit handling should be tested", true)
+    fun `sendMessage exitoso guarda mensaje del usuario y respuesta del asistente`() = runTest {
+        whenever(prefs.getString(eq("openai_api_key"), any())).thenReturn("sk-test")
+        wheneverBlocking {
+            openAIService.sendMessage(any(), any(), any())
+        }.thenReturn(OpenAIMessage(role = "assistant", content = "Buenos días, señor."))
+
+        val result = repository.sendMessage("Hola JARVIS")
+
+        assertTrue(result.isSuccess)
+        assertEquals(MessageRole.ASSISTANT, result.getOrNull()?.role)
+        assertEquals("Buenos días, señor.", result.getOrNull()?.content)
+
+        // Se usa el servicio de OpenAI con la clave guardada y el modelo por defecto
+        coVerify {
+            openAIService.sendMessage(eq("sk-test"), eq("gpt-4o"), any())
+        }
+        // Mensaje del usuario + respuesta del asistente
+        coVerify(exactly = 2) { messageDao.insertMessage(any()) }
     }
 
     @Test
-    fun `sendMessage returns ApiKeyInvalidException on HTTP 401`() = runTest {
-        // Given: A repository where API returns 401
-        // When: sendMessage is called
-        // Then: Result should be failure with ApiKeyInvalidException
-        
-        assertTrue("Invalid API key handling should be tested", true)
+    fun `sendMessage mapea HTTP 401 a ApiKeyInvalidException`() = runTest {
+        whenever(prefs.getString(eq("openai_api_key"), any())).thenReturn("sk-invalida")
+        wheneverBlocking {
+            openAIService.sendMessage(any(), any(), any())
+        }.thenThrow(httpException(401))
+
+        val result = repository.sendMessage("Hola")
+
+        assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull() is ApiKeyInvalidException)
     }
 
     @Test
-    fun `sendMessage returns NoInternetException on IOException`() = runTest {
-        // Given: A repository with no network
-        // When: sendMessage is called
-        // Then: Result should be failure with NoInternetException
-        
-        assertTrue("Network error handling should be tested", true)
+    fun `sendMessage mapea HTTP 429 a RateLimitException`() = runTest {
+        whenever(prefs.getString(eq("openai_api_key"), any())).thenReturn("sk-test")
+        wheneverBlocking {
+            openAIService.sendMessage(any(), any(), any())
+        }.thenThrow(httpException(429))
+
+        val result = repository.sendMessage("Hola")
+
+        assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull() is RateLimitException)
     }
 
     @Test
-    fun `clearHistory removes all messages from database`() = runTest {
-        // Given: A repository with messages in history
-        // When: clearHistory is called
-        // Then: Database should be empty
-        
-        // Example:
-        // repository.clearHistory()
-        // verify(mockDao).deleteAllMessages()
-        
-        assertTrue("Clear history should be tested", true)
+    fun `sendMessage mapea HTTP 500 a ServerErrorException`() = runTest {
+        whenever(prefs.getString(eq("openai_api_key"), any())).thenReturn("sk-test")
+        wheneverBlocking {
+            openAIService.sendMessage(any(), any(), any())
+        }.thenThrow(httpException(503))
+
+        val result = repository.sendMessage("Hola")
+
+        assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull() is ServerErrorException)
     }
 
     @Test
-    fun `loadStoredMessages returns saved messages`() = runTest {
-        // Given: A repository with messages saved in Room
-        // When: loadStoredMessages is called
-        // Then: All saved messages should be returned
-        
-        assertTrue("Load stored messages should be tested", true)
+    fun `sendMessage mapea timeout a NetworkTimeoutException`() = runTest {
+        whenever(prefs.getString(eq("openai_api_key"), any())).thenReturn("sk-test")
+        wheneverBlocking {
+            openAIService.sendMessage(any(), any(), any())
+        }.thenThrow(SocketTimeoutException("timeout"))
+
+        val result = repository.sendMessage("Hola")
+
+        assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull() is NetworkTimeoutException)
     }
 
     @Test
-    fun `conversation history is limited to 50 messages`() = runTest {
-        // Given: A conversation with 50+ messages
-        // When: New message is sent
-        // Then: History should be trimmed to keep system + recent 20
-        
-        assertTrue("History trimming should be tested", true)
+    fun `sendMessage mapea IOException a NoInternetException`() = runTest {
+        whenever(prefs.getString(eq("openai_api_key"), any())).thenReturn("sk-test")
+        wheneverBlocking {
+            openAIService.sendMessage(any(), any(), any())
+        }.thenThrow(IOException("network down"))
+
+        val result = repository.sendMessage("Hola")
+
+        assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull() is NoInternetException)
     }
 
     @Test
-    fun `getApiKey returns null when not set`() {
-        // Given: Fresh preferences
-        // When: getApiKey is called
-        // Then: Should return null
-        
-        assertTrue("API key retrieval should be tested", true)
+    fun `getSelectedProvider hace fallback a OPENAI con valor inválido guardado`() {
+        whenever(prefs.getString(any(), any())).thenReturn("PROVIDER_INEXISTENTE")
+
+        assertEquals(AIProvider.OPENAI, repository.getSelectedProvider())
     }
 
     @Test
-    fun `saveApiKey persists key to encrypted preferences`() {
-        // Given: A repository
-        // When: saveApiKey is called with a key
-        // Then: Key should be saved and retrievable
-        
-        assertTrue("API key persistence should be tested", true)
+    fun `getSelectedProvider devuelve el provider guardado`() {
+        whenever(prefs.getString(any(), any())).thenReturn(AIProvider.GEMINI.name)
+
+        assertEquals(AIProvider.GEMINI, repository.getSelectedProvider())
     }
+
+    @Test
+    fun `isSetupComplete es false sin API key y true con ella`() {
+        whenever(prefs.getString(eq("openai_api_key"), any())).thenReturn(null)
+        assertEquals(false, repository.isSetupComplete())
+
+        whenever(prefs.getString(eq("openai_api_key"), any())).thenReturn("sk-test")
+        assertEquals(true, repository.isSetupComplete())
+    }
+
+    @Test
+    fun `sendMessageStream lanza ApiKeyNotConfiguredException al recolectar sin API key`() = runTest {
+        val exception = runCatching {
+            repository.sendMessageStream("Hola").first()
+        }.exceptionOrNull()
+
+        assertTrue(exception is ApiKeyNotConfiguredException)
+        coVerify(exactly = 0) { messageDao.insertMessage(any()) }
+    }
+
+    @Test
+    fun `saveApiKey persiste la clave cifrada del provider`() {
+        repository.saveApiKey(AIProvider.OPENAI, "sk-nueva")
+
+        verify(editor).putString(eq("openai_api_key"), eq("sk-nueva"))
+        verify(editor).apply()
+    }
+
+    private fun httpException(code: Int): HttpException =
+        HttpException(Response.error<Any>(code, ResponseBody.create(null, "")))
 }

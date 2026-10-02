@@ -3,6 +3,7 @@ package com.jarvis.assistant.di
 import android.content.Context
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import com.jarvis.assistant.BuildConfig
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.jarvis.assistant.data.api.OpenAIApi
@@ -38,8 +39,14 @@ object AppModule {
     @Provides
     @Singleton
     fun provideOkHttpClient(): OkHttpClient {
+        // BODY en debug para diagnóstico; NONE en release para no filtrar en logcat
+        // el header Authorization (API keys) ni el contenido de los chats.
         val logging = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
+            level = if (BuildConfig.DEBUG) {
+                HttpLoggingInterceptor.Level.BODY
+            } else {
+                HttpLoggingInterceptor.Level.NONE
+            }
         }
 
         return OkHttpClient.Builder()
@@ -66,6 +73,10 @@ object AppModule {
         return retrofit.create(OpenAIApi::class.java)
     }
 
+    // NOTA: Jetpack Security Crypto (EncryptedSharedPreferences) fue deprecada por Google
+    // en security-crypto 1.1.0-alpha07 (abril 2025) y nunca alcanzó una API estable de
+    // reemplazo. 1.1.0-alpha06 es la última versión cuya API no está marcada deprecada.
+    // Migración recomendada a futuro: Android Keystore (AES/GCM) + DataStore.
     @Provides
     @Singleton
     @Named("encrypted")

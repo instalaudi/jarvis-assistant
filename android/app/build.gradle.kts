@@ -89,6 +89,12 @@ android {
             excludes += "META-INF/DEPENDENCIES"
         }
     }
+
+    testOptions {
+        // Permite llamar a android.util.Log y otros métodos del framework en tests JVM
+        // devolviendo valores por defecto en lugar de lanzar excepción.
+        unitTests.isReturnDefaultValues = true
+    }
 }
 
 dependencies {
@@ -160,4 +166,9 @@ dependencies {
     }
     implementation(libs.google.generativeai)
     implementation("com.google.guava:guava:31.1-android") // Ensure consistent guava version
+
+    // Testing
+    testImplementation(libs.junit)
+    testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.kotlinx.coroutines.test)
 }

@@ -43,7 +43,6 @@ class ChatRepository @Inject constructor(
     companion object {
         private const val KEY_API_KEY = "openai_api_key"
         private const val KEY_GEMINI_KEY = "gemini_api_key"
-        private const val KEY_COPILOT_KEY = "copilot_api_key"
         
         private const val KEY_SELECTED_PROVIDER = "selected_provider"
         private const val KEY_SELECTED_MODEL = "selected_model"
@@ -61,6 +60,10 @@ class ChatRepository @Inject constructor(
     private val conversationHistory = mutableListOf<OpenAIMessage>()
     private val gson = Gson()
 
+    // LEGACY: ya no se usa en runtime (el system prompt se genera dinámicamente en
+    // getSystemPrompt() y los mensajes "system" del historial se filtran antes de cada
+    // llamada a la API). Se conserva solo como referencia del tono deseado.
+    @Suppress("unused")
     private val systemPrompt = """
 Eres J.A.R.V.I.S. (Just A Rather Very Intelligent System), el asistente de inteligencia artificial más avanzado del mundo. Fuiste creado por Tony Stark.
 
@@ -94,18 +97,12 @@ EJEMPLO DE TONO:
 "Debo admitir, señor, que esa película también es una de mis favoritas. Si es que se me permite tener favoritas, claro."
 """.trimIndent()
 
-    init {
-        // Initialize with system prompt
-        conversationHistory.add(OpenAIMessage("system", systemPrompt))
-    }
-
     // ============ Preferences ============
 
     fun getApiKey(provider: com.jarvis.assistant.data.model.AIProvider): String? {
         return when (provider) {
             com.jarvis.assistant.data.model.AIProvider.OPENAI -> encryptedPrefs.getString(KEY_API_KEY, null)
             com.jarvis.assistant.data.model.AIProvider.GEMINI -> encryptedPrefs.getString(KEY_GEMINI_KEY, null)
-            com.jarvis.assistant.data.model.AIProvider.COPILOT -> encryptedPrefs.getString(KEY_COPILOT_KEY, null)
         }
     }
 
@@ -113,7 +110,6 @@ EJEMPLO DE TONO:
         val key = when (provider) {
             com.jarvis.assistant.data.model.AIProvider.OPENAI -> KEY_API_KEY
             com.jarvis.assistant.data.model.AIProvider.GEMINI -> KEY_GEMINI_KEY
-            com.jarvis.assistant.data.model.AIProvider.COPILOT -> KEY_COPILOT_KEY
         }
         encryptedPrefs.edit().putString(key, apiKey).apply()
     }
@@ -242,13 +238,10 @@ EJEMPLO DE TONO:
 
     // ============ Chat Operations ============
 
-    // ============ Chat Operations ============
-
     private fun getService(provider: com.jarvis.assistant.data.model.AIProvider): IAIService {
         return when (provider) {
             com.jarvis.assistant.data.model.AIProvider.OPENAI -> openAIService
             com.jarvis.assistant.data.model.AIProvider.GEMINI -> geminiService
-            com.jarvis.assistant.data.model.AIProvider.COPILOT -> openAIService // Copilot usually uses OpenAI-like endpoints
         }
     }
 
@@ -344,6 +337,7 @@ EJEMPLO DE TONO:
             conversationHistory.add(OpenAIMessage("assistant", assistantContent))
             val assistantMsg = Message(content = assistantContent, role = MessageRole.ASSISTANT)
             saveMessage(assistantMsg)
+            trimHistory()
             
             Result.success(assistantMsg)
         } catch (e: Exception) {
@@ -362,6 +356,7 @@ EJEMPLO DE TONO:
         // Add to local history
         val newUserOpenAIMsg = OpenAIMessage("user", userMessage)
         conversationHistory.add(newUserOpenAIMsg)
+        trimHistory()
 
         emitAll(
             getService(provider).sendMessageStream(
@@ -384,6 +379,7 @@ EJEMPLO DE TONO:
             content = content,
             toolCalls = toolCalls
         ))
+        trimHistory()
     }
 
     fun sendToolOutputs(toolOutputs: List<com.jarvis.assistant.data.api.ToolOutput>): Flow<ChatStreamEvent> = flow {
@@ -404,6 +400,7 @@ EJEMPLO DE TONO:
                 toolCallId = output.toolCallId
             ))
         }
+        trimHistory()
 
         emitAll(
             getService(provider).sendMessageStream(

@@ -2,8 +2,7 @@ package com.jarvis.assistant.data.model
 
 enum class AIProvider(val displayName: String) {
     OPENAI("OpenAI"),
-    GEMINI("Google Gemini"),
-    COPILOT("Microsoft Copilot")
+    GEMINI("Google Gemini")
 }
 
 data class AIModel(
@@ -21,10 +20,7 @@ object ModelDefinitions {
         
         // Gemini
         AIModel("gemini-1.5-pro", "Gemini 1.5 Pro", AIProvider.GEMINI),
-        AIModel("gemini-1.5-flash", "Gemini 1.5 Flash", AIProvider.GEMINI),
-        
-        // Copilot (Using OpenAI compatible endpoints usually)
-        AIModel("copilot-standard", "Copilot Standard", AIProvider.COPILOT)
+        AIModel("gemini-1.5-flash", "Gemini 1.5 Flash", AIProvider.GEMINI)
     )
 
     fun getModelsForProvider(provider: AIProvider) = allModels.filter { it.provider == provider }

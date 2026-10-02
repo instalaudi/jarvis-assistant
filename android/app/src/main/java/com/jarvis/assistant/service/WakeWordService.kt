@@ -36,8 +36,8 @@ class WakeWordService : Service() {
                     Log.d("WakeWordService", "Received PAUSE_LISTENING command")
                     isPaused = true
                     stopListeningInternal()
-                    // Pequeño retardo extra para asegurar la liberación de recursos del sistema
-                    runBlocking { delay(100) } 
+                    // No se usa runBlocking aquí: bloqueaba el hilo main y podía provocar ANRs.
+                    // startListeningInternal() ya aplica su propio buffer de 100ms al reanudar.
                 }
                 ACTION_RESUME_LISTENING -> {
                     Log.d("WakeWordService", "Received RESUME_LISTENING command")

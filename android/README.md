@@ -2,8 +2,6 @@
 
 <div align="center">
 
-![JARVIS Logo](app/src/main/res/drawable/ic_launcher_foreground.xml)
-
 **Just A Rather Very Intelligent System**
 
 *Asistente de IA personal para Android 15*
@@ -140,6 +138,9 @@ Para que JARVIS funcione correctamente en tu **Poco X7 Pro**:
 - API key almacenada con `EncryptedSharedPreferences`
 - Comunicación HTTPS con OpenAI
 - Permisos solicitados en runtime
+- Logging HTTP (`BODY`) solo en builds debug; en release se desactiva para no filtrar claves ni conversaciones
+
+> ⚠️ **Nota**: Jetpack Security Crypto (`EncryptedSharedPreferences`) fue deprecada por Google en abril de 2025. El proyecto usa la última versión con API no marcada deprecada (`1.1.0-alpha06`); la migración recomendada a futuro es Android Keystore + DataStore.
 
 ---
 

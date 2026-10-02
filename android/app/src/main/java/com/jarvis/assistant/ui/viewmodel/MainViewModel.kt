@@ -51,6 +51,9 @@ class MainViewModel @Inject constructor(
     private var ttsEnabled = true
     private var conversationWindowJob: kotlinx.coroutines.Job? = null
 
+    // Frases completas (terminan en . ! ? … seguido de espacio) para el TTS en streaming
+    private val sentenceEndRegex = Regex("(?<=[.!?…])\\s+")
+
     init {
         checkSetupStatus()
         initializeServices()
@@ -300,6 +303,9 @@ class MainViewModel @Inject constructor(
         _chatState.update { state -> state.copy(messages = state.messages + initialMessage) }
 
         val fullResponseBuilder = StringBuilder()
+        // Texto recibido pero aún sin hablar (esperando el final de la frase)
+        val speechBuffer = StringBuilder()
+        var speechStarted = false
         var lastUpdate = 0L
         val batchInterval = 50L
 
@@ -318,6 +324,22 @@ class MainViewModel @Inject constructor(
                                 state.copy(messages = updatedMessages)
                             }
                             lastUpdate = now
+                        }
+
+                        // TTS en streaming: encolar frases completas mientras el LLM sigue generando
+                        if (ttsEnabled) {
+                            speechBuffer.append(event.content)
+                            val sentences = sentenceEndRegex.split(speechBuffer.toString())
+                            if (sentences.size > 1) {
+                                val toSpeak = sentences.subList(0, sentences.size - 1).joinToString(" ")
+                                if (!speechStarted) {
+                                    speechStarted = true
+                                    transitionTo(com.jarvis.assistant.data.model.JarvisState.SPEAKING)
+                                }
+                                textToSpeechService.speakQueued(toSpeak)
+                                speechBuffer.clear()
+                                speechBuffer.append(sentences.last())
+                            }
                         }
                     }
                     is ChatStreamEvent.ToolCall -> {
@@ -351,9 +373,24 @@ class MainViewModel @Inject constructor(
                            }
                            
                            if (ttsEnabled) {
-                               transitionTo(com.jarvis.assistant.data.model.JarvisState.SPEAKING)
-                               textToSpeechService.speak(currentText) {
-                                   transitionTo(com.jarvis.assistant.data.model.JarvisState.COOLDOWN) // Trigger Conversation Window
+                               if (speechStarted) {
+                                   // Ya venimos hablando por frases: encolar el resto y pasar a
+                                   // COOLDOWN cuando la cola termine de drenar
+                                   val remainder = speechBuffer.toString().trim()
+                                   if (remainder.isNotEmpty()) {
+                                       textToSpeechService.speakQueued(remainder) {
+                                           transitionTo(com.jarvis.assistant.data.model.JarvisState.COOLDOWN) // Trigger Conversation Window
+                                       }
+                                   } else {
+                                       textToSpeechService.whenQueueDrained {
+                                           transitionTo(com.jarvis.assistant.data.model.JarvisState.COOLDOWN) // Trigger Conversation Window
+                                       }
+                                   }
+                               } else {
+                                   transitionTo(com.jarvis.assistant.data.model.JarvisState.SPEAKING)
+                                   textToSpeechService.speak(currentText) {
+                                       transitionTo(com.jarvis.assistant.data.model.JarvisState.COOLDOWN) // Trigger Conversation Window
+                                   }
                                }
                            } else {
                                transitionTo(com.jarvis.assistant.data.model.JarvisState.IDLE)
