@@ -19,7 +19,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.any
-import org.mockito.kotlin.anyNullable
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
@@ -73,7 +73,7 @@ class ChatRepositoryTest {
 
     @Test
     fun `sendMessage exitoso guarda mensaje del usuario y respuesta del asistente`() = runTest {
-        whenever(prefs.getString(eq("openai_api_key"), anyNullable())).thenReturn("sk-test")
+        whenever(prefs.getString(eq("openai_api_key"), anyOrNull())).thenReturn("sk-test")
         wheneverBlocking {
             openAIService.sendMessage(any(), any(), any())
         }.thenReturn(OpenAIMessage(role = "assistant", content = "Buenos días, señor."))
@@ -94,7 +94,7 @@ class ChatRepositoryTest {
 
     @Test
     fun `sendMessage mapea HTTP 401 a ApiKeyInvalidException`() = runTest {
-        whenever(prefs.getString(eq("openai_api_key"), anyNullable())).thenReturn("sk-invalida")
+        whenever(prefs.getString(eq("openai_api_key"), anyOrNull())).thenReturn("sk-invalida")
         wheneverBlocking {
             openAIService.sendMessage(any(), any(), any())
         }.thenThrow(httpException(401))
@@ -107,7 +107,7 @@ class ChatRepositoryTest {
 
     @Test
     fun `sendMessage mapea HTTP 429 a RateLimitException`() = runTest {
-        whenever(prefs.getString(eq("openai_api_key"), anyNullable())).thenReturn("sk-test")
+        whenever(prefs.getString(eq("openai_api_key"), anyOrNull())).thenReturn("sk-test")
         wheneverBlocking {
             openAIService.sendMessage(any(), any(), any())
         }.thenThrow(httpException(429))
@@ -120,7 +120,7 @@ class ChatRepositoryTest {
 
     @Test
     fun `sendMessage mapea HTTP 500 a ServerErrorException`() = runTest {
-        whenever(prefs.getString(eq("openai_api_key"), anyNullable())).thenReturn("sk-test")
+        whenever(prefs.getString(eq("openai_api_key"), anyOrNull())).thenReturn("sk-test")
         wheneverBlocking {
             openAIService.sendMessage(any(), any(), any())
         }.thenThrow(httpException(503))
@@ -133,7 +133,7 @@ class ChatRepositoryTest {
 
     @Test
     fun `sendMessage mapea timeout a NetworkTimeoutException`() = runTest {
-        whenever(prefs.getString(eq("openai_api_key"), anyNullable())).thenReturn("sk-test")
+        whenever(prefs.getString(eq("openai_api_key"), anyOrNull())).thenReturn("sk-test")
         wheneverBlocking {
             openAIService.sendMessage(any(), any(), any())
         }.thenAnswer { throw SocketTimeoutException("timeout") }
@@ -146,7 +146,7 @@ class ChatRepositoryTest {
 
     @Test
     fun `sendMessage mapea IOException a NoInternetException`() = runTest {
-        whenever(prefs.getString(eq("openai_api_key"), anyNullable())).thenReturn("sk-test")
+        whenever(prefs.getString(eq("openai_api_key"), anyOrNull())).thenReturn("sk-test")
         wheneverBlocking {
             openAIService.sendMessage(any(), any(), any())
         }.thenAnswer { throw IOException("network down") }
@@ -159,24 +159,24 @@ class ChatRepositoryTest {
 
     @Test
     fun `getSelectedProvider hace fallback a OPENAI con valor inválido guardado`() {
-        whenever(prefs.getString(anyNullable(), anyNullable())).thenReturn("PROVIDER_INEXISTENTE")
+        whenever(prefs.getString(anyOrNull(), anyOrNull())).thenReturn("PROVIDER_INEXISTENTE")
 
         assertEquals(AIProvider.OPENAI, repository.getSelectedProvider())
     }
 
     @Test
     fun `getSelectedProvider devuelve el provider guardado`() {
-        whenever(prefs.getString(anyNullable(), anyNullable())).thenReturn(AIProvider.GEMINI.name)
+        whenever(prefs.getString(anyOrNull(), anyOrNull())).thenReturn(AIProvider.GEMINI.name)
 
         assertEquals(AIProvider.GEMINI, repository.getSelectedProvider())
     }
 
     @Test
     fun `isSetupComplete es false sin API key y true con ella`() {
-        whenever(prefs.getString(eq("openai_api_key"), anyNullable())).thenReturn(null)
+        whenever(prefs.getString(eq("openai_api_key"), anyOrNull())).thenReturn(null)
         assertEquals(false, repository.isSetupComplete())
 
-        whenever(prefs.getString(eq("openai_api_key"), anyNullable())).thenReturn("sk-test")
+        whenever(prefs.getString(eq("openai_api_key"), anyOrNull())).thenReturn("sk-test")
         assertEquals(true, repository.isSetupComplete())
     }
 
