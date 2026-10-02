@@ -19,10 +19,11 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.any
-import org.mockito.kotlin.coVerify
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyBlocking
 import org.mockito.kotlin.whenever
 import org.mockito.kotlin.wheneverBlocking
 import retrofit2.HttpException
@@ -66,7 +67,7 @@ class ChatRepositoryTest {
         assertTrue(result.isFailure)
         assertTrue(result.exceptionOrNull() is ApiKeyNotConfiguredException)
         // El mensaje del usuario no debe guardarse si no hay clave
-        coVerify(exactly = 0) { messageDao.insertMessage(any()) }
+        verifyBlocking(messageDao, times(0)) { insertMessage(any()) }
     }
 
     @Test
@@ -83,11 +84,11 @@ class ChatRepositoryTest {
         assertEquals("Buenos días, señor.", result.getOrNull()?.content)
 
         // Se usa el servicio de OpenAI con la clave guardada y el modelo por defecto
-        coVerify {
-            openAIService.sendMessage(eq("sk-test"), eq("gpt-4o"), any())
+        verifyBlocking(openAIService) {
+            sendMessage(eq("sk-test"), eq("gpt-4o"), any())
         }
         // Mensaje del usuario + respuesta del asistente
-        coVerify(exactly = 2) { messageDao.insertMessage(any()) }
+        verifyBlocking(messageDao, times(2)) { insertMessage(any()) }
     }
 
     @Test
@@ -185,7 +186,7 @@ class ChatRepositoryTest {
         }.exceptionOrNull()
 
         assertTrue(exception is ApiKeyNotConfiguredException)
-        coVerify(exactly = 0) { messageDao.insertMessage(any()) }
+        verifyBlocking(messageDao, times(0)) { insertMessage(any()) }
     }
 
     @Test

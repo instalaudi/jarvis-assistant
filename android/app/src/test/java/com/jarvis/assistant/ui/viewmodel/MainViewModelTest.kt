@@ -104,7 +104,7 @@ class MainViewModelTest {
         assertEquals(JarvisState.LISTENING, viewModel.jarvisState.value)
         assertTrue(viewModel.chatState.value.isListening)
         verify(context, atLeastOnce()).sendBroadcast(
-            argThat<Intent> { it.action == "com.jarvis.assistant.PAUSE_LISTENING" }
+            argThat<Intent> { action == "com.jarvis.assistant.PAUSE_LISTENING" }
         )
     }
 
