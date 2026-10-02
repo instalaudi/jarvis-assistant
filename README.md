@@ -1,8 +1,8 @@
 # J.A.R.V.I.S. (Just A Rather Very Intelligent System) - v2.2.0
 
-![JARVIS Logo](https://raw.githubusercontent.com/username/repo/main/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png)
+[![Android CI](https://github.com/Instalaudi/jarvis-assistant/actions/workflows/android-ci.yml/badge.svg)](https://github.com/Instalaudi/jarvis-assistant/actions/workflows/android-ci.yml)
 
-**JARVIS** es un asistente inteligente personal diseñado para Android, inspirado en la sofisticación y eficiencia de los sistemas de inteligencia artificial de ciencia ficción. Este proyecto combina el poder de LLMs modernos (GPT-4o, Gemini, Copilot) con una integración profunda en el sistema operativo Android para ofrecer una experiencia de manos libres y control total.
+**JARVIS** es un asistente inteligente personal diseñado para Android, inspirado en la sofisticación y eficiencia de los sistemas de inteligencia artificial de ciencia ficción. Este proyecto combina el poder de LLMs modernos (GPT-4o, Gemini) con una integración profunda en el sistema operativo Android para ofrecer una experiencia de manos libres y control total.
 
 ---
 
@@ -44,6 +44,8 @@ Para probar la versión más reciente:
 2. Descarga el archivo `app-release.apk`.
 3. Instala en tu dispositivo Android (Requiere habilitar "Fuentes desconocidas").
 4. **Permisos**: Asegúrate de otorgar permisos de Micrófono, Notificaciones y Contactos para el funcionamiento total.
+
+> 🚀 Las releases se generan automáticamente al publicar un tag `v*` (ver [CONTRIBUTING.md](CONTRIBUTING.md#-releases-automáticos)).
 
 ---
 

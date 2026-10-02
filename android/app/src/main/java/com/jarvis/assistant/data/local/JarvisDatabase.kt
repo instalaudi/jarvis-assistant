@@ -27,6 +27,10 @@ abstract class JarvisDatabase : RoomDatabase() {
                     JarvisDatabase::class.java,
                     DATABASE_NAME
                 )
+                    // Si la app se actualiza desde una versión anterior de la BD sin migración
+                    // definida, se recrea la base en lugar de lanzar un crash (el historial de
+                    // chat es prescindible; un IllegalStateException al abrir la app no lo es).
+                    .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
                 instance

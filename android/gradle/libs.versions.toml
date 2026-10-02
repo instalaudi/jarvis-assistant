@@ -1,13 +1,13 @@
 [versions]
-agp = "8.7.3"
-kotlin = "2.0.21"
+agp = "8.9.3"
+kotlin = "2.1.20"
 coreKtx = "1.15.0"
 lifecycleRuntime = "2.8.7"
 activityCompose = "1.9.3"
-composeBom = "2024.12.01"
+composeBom = "2025.06.01"
 retrofit = "2.11.0"
 okhttp = "4.12.0"
-hilt = "2.53.1"
+hilt = "2.56.2"
 hiltNavigationCompose = "1.2.0"
 roomVersion = "2.6.1"
 navigationCompose = "2.8.5"
@@ -15,8 +15,8 @@ datastore = "1.1.1"
 gson = "2.11.0"
 lottie = "6.6.2"
 accompanist = "0.36.0"
-ksp = "2.0.21-1.0.28"
-coroutines = "1.9.0"
+ksp = "2.1.20-1.0.32"
+coroutines = "1.10.2"
 securityCrypto = "1.1.0-alpha06"
 splashscreen = "1.0.1"
 playServicesAuth = "21.0.0"
@@ -24,6 +24,8 @@ googleApiClient = "2.2.0"
 gmailApi = "v1-rev20220404-2.0.0"
 googleAuthLibrary = "1.19.0"
 generativeai = "0.9.0"
+junit = "4.13.2"
+mockitoKotlin = "5.4.0"
 
 [libraries]
 # Core Android
@@ -85,6 +87,11 @@ google-api-client-android = { group = "com.google.api-client", name = "google-ap
 google-api-services-gmail = { group = "com.google.apis", name = "google-api-services-gmail", version.ref = "gmailApi" }
 google-auth-library = { group = "com.google.auth", name = "google-auth-library-oauth2-http", version.ref = "googleAuthLibrary" }
 google-generativeai = { group = "com.google.ai.client.generativeai", name = "generativeai", version.ref = "generativeai" }
+
+# Testing
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockitoKotlin" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

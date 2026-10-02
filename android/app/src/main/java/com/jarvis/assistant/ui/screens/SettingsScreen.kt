@@ -318,7 +318,6 @@ fun SettingsScreen(
                     val currentKey = when (selectedProvider) {
                         com.jarvis.assistant.data.model.AIProvider.OPENAI -> uiState.openaiKey
                         com.jarvis.assistant.data.model.AIProvider.GEMINI -> uiState.geminiKey
-                        com.jarvis.assistant.data.model.AIProvider.COPILOT -> uiState.copilotKey
                     }
 
                     SettingsClickableItem(

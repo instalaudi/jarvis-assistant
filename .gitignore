@@ -27,6 +27,7 @@ local.properties
 *.keystore
 keystore.properties
 signing_report.txt
+key_info.txt
 
 # Log files
 *.log

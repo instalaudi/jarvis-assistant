@@ -20,7 +20,6 @@ data class SettingsUiState(
     val selectedModelId: String = "gpt-4o",
     val openaiKey: String = "",
     val geminiKey: String = "",
-    val copilotKey: String = "",
     val wakeWordEnabled: Boolean = false,
     val appVersion: String = "2.1.0",
     val currentModelName: String = "GPT-4o"
@@ -53,7 +52,6 @@ class SettingsViewModel @Inject constructor(
             selectedModelId = chatRepository.getSelectedModel(),
             openaiKey = chatRepository.getApiKey(com.jarvis.assistant.data.model.AIProvider.OPENAI) ?: "",
             geminiKey = chatRepository.getApiKey(com.jarvis.assistant.data.model.AIProvider.GEMINI) ?: "",
-            copilotKey = chatRepository.getApiKey(com.jarvis.assistant.data.model.AIProvider.COPILOT) ?: "",
             wakeWordEnabled = chatRepository.isWakeWordEnabled(),
             appVersion = "2.1.0",
             currentModelName = com.jarvis.assistant.data.model.ModelDefinitions.getModelById(chatRepository.getSelectedModel()).name
@@ -81,7 +79,6 @@ class SettingsViewModel @Inject constructor(
             when (provider) {
                 com.jarvis.assistant.data.model.AIProvider.OPENAI -> it.copy(openaiKey = key)
                 com.jarvis.assistant.data.model.AIProvider.GEMINI -> it.copy(geminiKey = key)
-                com.jarvis.assistant.data.model.AIProvider.COPILOT -> it.copy(copilotKey = key)
             }
         }
     }
