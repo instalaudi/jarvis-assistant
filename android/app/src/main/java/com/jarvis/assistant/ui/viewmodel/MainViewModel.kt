@@ -194,14 +194,14 @@ class MainViewModel @Inject constructor(
     }
 
     private fun pauseWakeWordListening() {
-        val intent = android.content.Intent("com.jarvis.assistant.PAUSE_LISTENING").apply {
+        val intent = android.content.Intent(com.jarvis.assistant.service.WakeWordService.ACTION_PAUSE_LISTENING).apply {
             `package` = context.packageName
         }
         context.sendBroadcast(intent)
     }
 
     private fun resumeWakeWordListening() {
-        val intent = android.content.Intent("com.jarvis.assistant.RESUME_LISTENING").apply {
+        val intent = android.content.Intent(com.jarvis.assistant.service.WakeWordService.ACTION_RESUME_LISTENING).apply {
             `package` = context.packageName
         }
         context.sendBroadcast(intent)
