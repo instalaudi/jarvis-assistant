@@ -80,7 +80,8 @@ class ChatRepositoryTest {
 
         val result = repository.sendMessage("Hola JARVIS")
 
-        assertTrue(result.isSuccess)
+        result.exceptionOrNull()?.printStackTrace()
+        assertTrue("Excepción inesperada: ${result.exceptionOrNull()}", result.isSuccess)
         assertEquals(MessageRole.ASSISTANT, result.getOrNull()?.role)
         assertEquals("Buenos días, señor.", result.getOrNull()?.content)
 
@@ -101,8 +102,8 @@ class ChatRepositoryTest {
 
         val result = repository.sendMessage("Hola")
 
-        assertTrue(result.isFailure)
-        assertTrue(result.exceptionOrNull() is ApiKeyInvalidException)
+        val exception = result.exceptionOrNull()
+        assertTrue("Excepción inesperada: $exception", exception is ApiKeyInvalidException)
     }
 
     @Test
@@ -114,8 +115,8 @@ class ChatRepositoryTest {
 
         val result = repository.sendMessage("Hola")
 
-        assertTrue(result.isFailure)
-        assertTrue(result.exceptionOrNull() is RateLimitException)
+        val exception = result.exceptionOrNull()
+        assertTrue("Excepción inesperada: $exception", exception is RateLimitException)
     }
 
     @Test
@@ -127,8 +128,8 @@ class ChatRepositoryTest {
 
         val result = repository.sendMessage("Hola")
 
-        assertTrue(result.isFailure)
-        assertTrue(result.exceptionOrNull() is ServerErrorException)
+        val exception = result.exceptionOrNull()
+        assertTrue("Excepción inesperada: $exception", exception is ServerErrorException)
     }
 
     @Test
@@ -140,8 +141,8 @@ class ChatRepositoryTest {
 
         val result = repository.sendMessage("Hola")
 
-        assertTrue(result.isFailure)
-        assertTrue(result.exceptionOrNull() is NetworkTimeoutException)
+        val exception = result.exceptionOrNull()
+        assertTrue("Excepción inesperada: $exception", exception is NetworkTimeoutException)
     }
 
     @Test
@@ -153,8 +154,8 @@ class ChatRepositoryTest {
 
         val result = repository.sendMessage("Hola")
 
-        assertTrue(result.isFailure)
-        assertTrue(result.exceptionOrNull() is NoInternetException)
+        val exception = result.exceptionOrNull()
+        assertTrue("Excepción inesperada: $exception", exception is NoInternetException)
     }
 
     @Test
